@@ -1,0 +1,43 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - "**/README.md"
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - "**/README.md"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install dependencies
+        run: make install
+      - name: Lint with pylint
+        run: make lint
+      - uses: psf/black@stable
+        with:
+          options: "--verbose --check"
+          jupyter: true
+      - name: Format code
+        run: make format
+#     - name: Test with pytest
+#       run: make tests
+#     - name: Commit changes
+#       uses: stefanzweifel/git-auto-commit-action@v4
+#       with:
+#         commit_message: Apply formatting changes
+#         branch: ${{ github.head_ref }}
+

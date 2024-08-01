@@ -1,49 +1,26 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
 import numpy as np
-import wave
-import struct
+from scipy.io.wavfile import write
 
 # carrier frequency
 fc = 440
-wc=2 * np.pi * fc # 2 * np.pi * fc
+wc = 2 * np.pi * fc
 
 # modulator frequency
-fm = 2*fc # fm = 2*fc
-wm= 2*np.pi * fm # 2 * np.pi * fm
+fm = 2 * fc
+wm = 2 * np.pi * fm
 
-# sampling rate
-sampling_rate = 48000.0
+sampling_rate = 48000
 
-# wave duration
-ts=20
+# número de segundos que quiero que dure el sonido (dominio de la onda)
+ts = 20
 
-num_samples = int(sampling_rate*ts)
+num_samples = int(sampling_rate * ts)
 
 # amplitude
-amp=1
-amplitude = int(32767*amp) # for the writing process
+amplitude = np.iinfo(np.int16).max  # format
 
-#wave
-FMpath=[]
-for x in range(num_samples):
-    t=x/sampling_rate 
-    I=t #we identify modulation index and time
-    FMpath.append(np.sin(wc* t + I*np.sin(wm* t))) # FMpath.append(np.sin(wc* t + I*np.sin(wm* t)))
+# wave
+t = np.linspace(0, ts, num_samples)
+FMpath = np.sin(wc * t + t * np.sin(wm * t))  # I=t (ranges from 0 to ts)
 
-# writing
-file = "FM path.wav"
-nframes=num_samples
-comptype="NONE"
-compname="not compressed"
-nchannels=1
-sampwidth=2
-wav_file=wave.open(file, 'w')
-wav_file.setparams((nchannels, sampwidth, int(sampling_rate), nframes, comptype, compname))
-for s in FMpath:
-    wav_file.writeframes(struct.pack('h', int(s*amplitude)))
-
+write("FM_path.wav", sampling_rate, (amplitude * FMpath).astype(np.int16))
